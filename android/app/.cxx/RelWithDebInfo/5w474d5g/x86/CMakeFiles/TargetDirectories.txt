@@ -1,0 +1,2 @@
+C:/Users/shivp/StudioProjects/iplayer/android/app/.cxx/RelWithDebInfo/5w474d5g/x86/CMakeFiles/edit_cache.dir
+C:/Users/shivp/StudioProjects/iplayer/android/app/.cxx/RelWithDebInfo/5w474d5g/x86/CMakeFiles/rebuild_cache.dir
