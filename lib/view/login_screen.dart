@@ -12,7 +12,9 @@ import '../res/component/round_button.dart';
 import '../utils/utils.dart';
 import 'Profile_Setup.dart';
 import 'Sign_In.dart';
-
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 class LoginScreen extends StatefulWidget {
   @override
   _LoginScreenState createState() => _LoginScreenState();
@@ -41,112 +43,48 @@ class _LoginScreenState extends State<LoginScreen> {
     _correctAnswer = _num1 + _num2;
   }
 
-  void _showPuzzleToast() {
-    TextEditingController answerController = TextEditingController();
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        backgroundColor: Colors.white,
-        title: Center(
-          child: Text(
-            "Solve the Puzzle 🧩",
-            style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              color: Colors.purpleAccent,
-            ),
-          ),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              "$_num1 + $_num2 = ?",
-              style: TextStyle(
-                fontSize: 26,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
-              ),
-            ),
-            SizedBox(height: 10),
-            TextField(
-              controller: answerController,
-              keyboardType: TextInputType.number,
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 20, color: Colors.black),
-              decoration: InputDecoration(
-                hintText: "Enter your answer",
-                filled: true,
-                fillColor: Colors.purpleAccent.shade100.withOpacity(0.2),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(15),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () async {
-              int? userAnswer = int.tryParse(answerController.text);
-              if (userAnswer == _correctAnswer) {
-                Fluttertoast.showToast(
-                  msg: "It's Correct!",
-                  toastLength: Toast.LENGTH_SHORT,
-                  gravity: ToastGravity.BOTTOM,
-                  backgroundColor: Colors.purpleAccent,
-                  textColor: Colors.white,
-                  fontSize: 16.0,
-                );
 
-                setState(() {
-                  _showAnimation = true;
-                });
 
-                await Future.delayed(Duration(seconds: 1));
+  void _handleGoogleSignIn() async {
+    try {
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
 
-                setState(() {
-                  _showAnimation = false;
-                });
+      if (googleUser == null) {
+        Fluttertoast.showToast(
+          msg: "Sign-in cancelled",
+          backgroundColor: Colors.grey,
+          textColor: Colors.white,
+        );
+        return;
+      }
 
-                Navigator.pop(context); // Close dialog
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => ProfileSetupScreen()),
-                );
-              } else {
-                Fluttertoast.showToast(
-                  msg: "Wrong! Try Again!",
-                  toastLength: Toast.LENGTH_SHORT,
-                  gravity: ToastGravity.BOTTOM,
-                  backgroundColor: Colors.purpleAccent,
-                  textColor: Colors.white,
-                  fontSize: 16.0,
-                );
-              }
-            },
-            style: TextButton.styleFrom(
-              backgroundColor: Colors.purpleAccent,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-              padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-            ),
-            child: Text(
-              "Submit",
-              style: TextStyle(
-                fontSize: 18,
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      await FirebaseAuth.instance.signInWithCredential(credential);
+
+      Fluttertoast.showToast(
+        msg: "Signed in as ${googleUser.displayName}",
+        backgroundColor: Colors.green,
+        textColor: Colors.white,
+      );
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => VideoApp()),
+      );
+    } catch (e) {
+      Fluttertoast.showToast(
+        msg: "Sign-in failed: $e",
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+      );
+    }
   }
-
-
   Future<void> _login() async {
     String email = _emailController.text.trim();
     String password = _passwordController.text.trim();
@@ -157,7 +95,6 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     try {
-
       UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: email,
         password: password,
@@ -191,7 +128,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: Padding(
                     padding: EdgeInsets.all(MediaQuery.of(context).size.width * 0.05), // Dynamic padding
                     child: Form(
-                      key: _formKey, // Assign the form key
+                      key: _formKey, 
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -308,9 +245,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                       side: BorderSide(color: Colors.grey.shade400)
                                   ),
                                 ),
-                                onPressed: _showPuzzleToast, // Call _login method
+                                onPressed: _handleGoogleSignIn, // Call _login method
                                 child: Text(
-                                  "PUZZLE",
+                                  "Google-Sign",
                                   style: TextStyle(
                                     fontSize: MediaQuery.of(context).size.width * 0.05,
                                     fontWeight: FontWeight.bold,

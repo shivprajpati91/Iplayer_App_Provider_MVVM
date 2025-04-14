@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:iplayer/view/Profile_Setup.dart';
 import 'package:iplayer/view/login_screen.dart';
+import 'package:iplayer/view/video_player_screen.dart';
 import '../utils/utils.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -50,7 +51,7 @@ class _SignUpScreenState extends State<SignUpScreen> with SingleTickerProviderSt
 
       Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(builder: (context) => ProfileSetupScreen()),
+        MaterialPageRoute(builder: (context) => VideoApp()),
             (route) => false,
       );
     } catch (e) {

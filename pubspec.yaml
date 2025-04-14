@@ -27,6 +27,7 @@ dependencies:
   image_picker: any
   introduction_screen: any
   showcaseview: any
+
   animated_text_kit: any
   intro_slider: any
   smooth_page_indicator: any
