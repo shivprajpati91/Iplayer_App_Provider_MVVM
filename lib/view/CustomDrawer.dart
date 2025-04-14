@@ -6,9 +6,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:intl/intl.dart';
-import 'package:iplayer/view/ProfileScreen.dart';
-import 'package:iplayer/view/Subsciption_Screen.dart';
+
 import 'package:iplayer/view/video_player_screen.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
@@ -16,21 +14,12 @@ import 'package:provider/provider.dart';
 // import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../utils/utils.dart';
-import 'login_screen.dart';
 import 'onboarding_screen.dart';
-import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:google_fonts/google_fonts.dart';
-
 
 class CustomDrawer extends StatefulWidget {
   @override
   _CustomDrawerState createState() => _CustomDrawerState();
 }
-
 class _CustomDrawerState extends State<CustomDrawer> {
   @override
   void initState() {
@@ -41,14 +30,6 @@ class _CustomDrawerState extends State<CustomDrawer> {
     });
   }
 
-  Future<void> _logout() async {
-    await FirebaseAuth.instance.signOut();
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => OnboardingScreen()),
-    );
-  }
-
   Future<String> getEmail() async {
     User? user = FirebaseAuth.instance.currentUser;
     return user?.email ?? 'Email not set';
@@ -56,17 +37,11 @@ class _CustomDrawerState extends State<CustomDrawer> {
 
   @override
   Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context); // 👈 Added MediaQuery once
+
     return Drawer(
       child: Stack(
         children: [
-          Container(
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/background.jpg'),
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
           Consumer<UserProfileProvider>(
             builder: (context, profile, child) {
               return ListView(
@@ -86,33 +61,34 @@ class _CustomDrawerState extends State<CustomDrawer> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        CircleAvatar(
-                          radius: 40,
-                          backgroundImage: (profile.profileImage.isNotEmpty)
-                              ? NetworkImage(profile.profileImage) // Use NetworkImage for Firebase URL
-                              : AssetImage('assets/default_avatar.png') as ImageProvider,
-                        ),
-                        SizedBox(height: 10),
-                        Text(
-                          profile.name.isNotEmpty ? profile.name : 'User Name',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                        SizedBox(height: mediaQuery.size.height * 0.1), // 👈 10% screen height
                         FutureBuilder<String>(
                           future: getEmail(),
                           builder: (context, snapshot) {
                             if (snapshot.connectionState == ConnectionState.waiting) {
-                              return Text('Loading...',
-                                  style: TextStyle(color: Colors.white70, fontSize: 12));
+                              return Text(
+                                'Loading...',
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: mediaQuery.size.width * 0.03, // 👈 3% screen width
+                                ),
+                              );
                             } else if (snapshot.hasError) {
-                              return Text('Error loading email',
-                                  style: TextStyle(color: Colors.white70, fontSize: 12));
+                              return Text(
+                                'Error loading email',
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: mediaQuery.size.width * 0.03,
+                                ),
+                              );
                             } else {
-                              return Text(snapshot.data ?? 'Email not set',
-                                  style: TextStyle(color: Colors.white70, fontSize: 12));
+                              return Text(
+                                snapshot.data ?? 'Email not set',
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: mediaQuery.size.width * 0.045, // 👈 4.5% screen width
+                                ),
+                              );
                             }
                           },
                         ),
@@ -120,86 +96,23 @@ class _CustomDrawerState extends State<CustomDrawer> {
                     ),
                   ),
                   ListTile(
-                    leading: Icon(Icons.home_outlined, color: Colors.deepPurple),
-                    title: Text('Home'),
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => VideoApp()),
-                      );
-                    },
-                  ),
-                  ListTile(
-                    leading: Icon(Icons.paid_outlined, color: Colors.deepPurple),
-                    title: Text('Subscription'),
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => VideoApp()),
-                      );
-                    },
-                  ),
-                  ListTile(
-                    leading: Icon(Icons.settings_outlined, color: Colors.deepPurple),
-                    title: Text('Profile'),
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => ProfileScreen(email: profile.name)),
-                      );
-                    },
-                  ),
-                  Divider(),
-                  ListTile(
-                    leading: Icon(Icons.help_outline, color: Colors.blue),
-                    title: Text('Help and Support'),
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => HelpAndSupportScreen()),
-                      );
-                    },
-                  ),
-                  ListTile(
-                    leading: Icon(Icons.favorite, color: Colors.pink),
-                    title: Text('Follow Me on Instagram'),
+                    leading: Icon(
+                      Icons.favorite,
+                      color: Colors.pink,
+                      size: mediaQuery.size.width * 0.07, // 👈 Icon responsive
+                    ),
+                    title: Text(
+                      'Follow Me on Instagram',
+                      style: TextStyle(fontSize: mediaQuery.size.width * 0.045), // 👈 Text responsive
+                    ),
                     onTap: () async {
-                      const instagramUrl =
-                          'https://www.instagram.com/flutter_with_prince?igsh=bTF4M3lpbDdkdmxj';
+                      const instagramUrl = 'https://www.instagram.com/flutter_with_prince?igsh=bTF4M3lpbDdkdmxj';
                       if (await canLaunch(instagramUrl)) {
                         await launch(instagramUrl);
                       } else {
                         throw 'Could not launch $instagramUrl';
                       }
                     },
-                  ),
-                  SizedBox(height: 180),
-                  ListTile(
-                    title: ElevatedButton(
-                      onPressed: _logout,
-                      child: Text("Log Out"),
-                      style: ElevatedButton.styleFrom(
-                        padding: EdgeInsets.symmetric(
-                          vertical: MediaQuery.of(context).size.height * 0.015,
-                          horizontal: MediaQuery.of(context).size.width * 0.2,
-                        ),
-                        textStyle: GoogleFonts.poppins(
-                          fontSize: MediaQuery.of(context).size.width * 0.04,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                              MediaQuery.of(context).size.width * 0.04),
-                        ),
-                        backgroundColor: Colors.redAccent,
-                        foregroundColor: Colors.white,
-                        elevation: MediaQuery.of(context).size.width * 0.02,
-                      ),
-                    ),
                   ),
                 ],
               );
@@ -299,20 +212,42 @@ class UserProfileProvider with ChangeNotifier {
 
 
 
-
 class HelpAndSupportScreen extends StatelessWidget {
+  const HelpAndSupportScreen({Key? key}) : super(key: key);
+
+  Future<void> _logout(BuildContext context) async {
+    await FirebaseAuth.instance.signOut();
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => OnboardingScreen()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context); // 👈 Added MediaQuery
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        leading: IconButton(
-          onPressed: () {
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>VideoApp()));
-          },
-          icon: Icon(Icons.arrow_back_rounded, color: Colors.white),
+        actions: [
+          IconButton(
+            onPressed: () => _logout(context),
+            icon: Icon(
+              Icons.logout,
+              color: Colors.white,
+              size: mediaQuery.size.width * 0.07, // 👈 Responsive Icon
+            ),
+          ),
+        ],
+        title: Text(
+          'Help & Support',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: mediaQuery.size.width * 0.05, // 👈 Responsive title size
+          ),
         ),
-        title: Text('Help & Support', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -324,47 +259,31 @@ class HelpAndSupportScreen extends StatelessWidget {
         ),
       ),
       body: Container(
-        decoration: BoxDecoration(
-         color: Colors.white,),
+        decoration: BoxDecoration(color: Colors.white),
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: EdgeInsets.all(mediaQuery.size.width * 0.04), // 👈 Responsive Padding
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 'Need Help?',
                 style: TextStyle(
-                  fontSize: 28,
+                  fontSize: mediaQuery.size.width * 0.07, // 👈 7% width font size
                   fontWeight: FontWeight.bold,
                   color: Colors.deepPurple.shade800,
                 ),
               ),
-              SizedBox(height: 8),
+              SizedBox(height: mediaQuery.size.height * 0.01), // 👈 Responsive space
               Text(
                 'We are here to assist you. Reach out to us through any of the following channels:',
-                style: TextStyle(fontSize: 16, color: Colors.black87),
+                style: TextStyle(
+                  fontSize: mediaQuery.size.width * 0.04, // 👈 Body text responsive
+                  color: Colors.black87,
+                ),
               ),
-              SizedBox(height: 20),
+              SizedBox(height: mediaQuery.size.height * 0.03),
               _buildSupportCard(
                 context: context,
-
-                title: 'Email Support',
-                subtitle: 'shivprajapati3435@gmail.com',
-                color: Colors.deepPurple,
-                onTap: () async {
-                  final emailUrl = Uri(
-                    scheme: 'mailto',
-                    path: 'shivprajapati3435@gmail.com',
-                    query: 'subject=Help%20and%20Support&body=Describe%20your%20issue%20here',
-                  );
-                  if (await canLaunchUrl(emailUrl)) {
-                    await launchUrl(emailUrl);
-                  }
-                },
-              ),
-              _buildSupportCard(
-                context: context,
-
                 title: 'WhatsApp Support',
                 subtitle: '+9644250027',
                 color: Colors.green,
@@ -377,7 +296,6 @@ class HelpAndSupportScreen extends StatelessWidget {
               ),
               _buildSupportCard(
                 context: context,
-
                 title: 'Instagram Support',
                 subtitle: '@flutter_with_prince',
                 color: Colors.pink,
@@ -397,47 +315,65 @@ class HelpAndSupportScreen extends StatelessWidget {
 
   Widget _buildSupportCard({
     required BuildContext context,
-
     required String title,
     required String subtitle,
     required Color color,
     required Function() onTap,
   }) {
+    final mediaQuery = MediaQuery.of(context); // 👈 MediaQuery inside card too
+
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: Duration(milliseconds: 500),
-        margin: EdgeInsets.symmetric(vertical: 10),
-        padding: EdgeInsets.all(16),
+        margin: EdgeInsets.symmetric(vertical: mediaQuery.size.height * 0.015), // 👈 Responsive margin
+        padding: EdgeInsets.all(mediaQuery.size.width * 0.04), // 👈 Responsive padding
         decoration: BoxDecoration(
           color: Colors.white.withOpacity(0.8),
-          borderRadius: BorderRadius.circular(15),
+          borderRadius: BorderRadius.circular(mediaQuery.size.width * 0.04), // 👈 Border Radius responsive
           boxShadow: [
             BoxShadow(
               color: color.withOpacity(0.2),
-              blurRadius: 10,
+              blurRadius: mediaQuery.size.width * 0.04, // 👈 Blur radius responsive
               spreadRadius: 2,
             ),
           ],
         ),
         child: Row(
           children: [
-
-            SizedBox(width: 12),
+            SizedBox(width: mediaQuery.size.width * 0.03), // 👈 Space at start
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                Text(subtitle, style: TextStyle(color: Colors.black54)),
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: mediaQuery.size.width * 0.045, // 👈 Title responsive
+                  ),
+                ),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    color: Colors.black54,
+                    fontSize: mediaQuery.size.width * 0.035, // 👈 Subtitle responsive
+                  ),
+                ),
               ],
             ),
             Spacer(),
-            Icon(Icons.arrow_forward_ios, color: Colors.grey),
+            Icon(
+              Icons.arrow_forward_ios,
+              color: Colors.grey,
+              size: mediaQuery.size.width * 0.05, // 👈 Arrow Icon responsive
+            ),
           ],
         ),
       ),
     );
   }
 }
+
+
 
 

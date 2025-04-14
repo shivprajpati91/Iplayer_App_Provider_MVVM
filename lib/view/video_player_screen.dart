@@ -1,45 +1,14 @@
-import 'dart:io';
-import 'dart:math';
 import 'dart:ui';
-import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
 import 'package:google_fonts/google_fonts.dart';
-import 'package:path/path.dart' as path ;
-import 'package:permission_handler/permission_handler.dart';
-
-import 'package:screen_brightness/screen_brightness.dart';
-
-import 'package:video_player/video_player.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:volume_controller/volume_controller.dart';
-import 'package:shimmer/shimmer.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'CustomDrawer.dart';
 import 'Library_Screen.dart';
 import 'Play_Screen.dart';
-import 'ProfileScreen.dart';
 import 'Subsciption_Screen.dart';
-import 'login_screen.dart';
-import 'package:animate_do/animate_do.dart';
-
-import 'dart:io';
-import 'dart:math';
-import 'dart:ui';
-import 'package:chewie/chewie.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-
-import 'package:google_fonts/google_fonts.dart';
-
-
 import 'package:floating_navbar/floating_navbar.dart';
 import 'package:floating_navbar/floating_navbar_item.dart';
-
-
-
 
 class VideoApp extends StatefulWidget {
   @override

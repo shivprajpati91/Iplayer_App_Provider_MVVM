@@ -19,7 +19,7 @@ class _SplashScreenState extends State<SplashScreen> {
   }
   Future<void> _startTimer() async {
 
-    await Future.delayed(Duration(seconds: 4));
+    await Future.delayed(Duration(minutes: 20));
     _checkLoginStatus();
   }
   Future<void> _checkLoginStatus() async {
@@ -81,13 +81,13 @@ class _SplashScreenState extends State<SplashScreen> {
             child: Lottie.asset("Anim/splash.json", height: screenHeight * 0.15),
           ),
           Positioned(
-            top: screenHeight * 0.5,
-            left: screenWidth * 0.26,
+            top: screenHeight * 0.52,
+            left: screenWidth * 0.25,
             child: Text(
-              "SLEEPLAY",
+              "EGOSTA DEVLOGS",
               style: TextStyle(
                 color: Colors.black,
-                fontSize: screenWidth * 0.1,
+                fontSize: screenWidth * 0.06,
                 fontWeight: FontWeight.w500,
               ),
             ),
