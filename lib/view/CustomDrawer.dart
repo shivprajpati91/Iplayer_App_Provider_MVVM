@@ -1,5 +1,8 @@
 import 'dart:io';
+
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
@@ -7,55 +10,63 @@ import 'package:intl/intl.dart';
 import 'package:iplayer/view/ProfileScreen.dart';
 import 'package:iplayer/view/Subsciption_Screen.dart';
 import 'package:iplayer/view/video_player_screen.dart';
-import 'package:path/path.dart';
+import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+// import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../utils/utils.dart';
 import 'login_screen.dart';
 import 'onboarding_screen.dart';
-class CustomDrawer extends StatelessWidget {
+import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+
+class CustomDrawer extends StatefulWidget {
+  @override
+  _CustomDrawerState createState() => _CustomDrawerState();
+}
+
+class _CustomDrawerState extends State<CustomDrawer> {
+  @override
+  void initState() {
+    super.initState();
+    // Fetch the user profile after the widget is built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<UserProfileProvider>(context, listen: false).fetchUserProfile();
+    });
+  }
+
+  Future<void> _logout() async {
+    await FirebaseAuth.instance.signOut();
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => OnboardingScreen()),
+    );
+  }
+
+  Future<String> getEmail() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    return user?.email ?? 'Email not set';
+  }
+
   @override
   Widget build(BuildContext context) {
-
-    final userProfileProvider = Provider.of<UserProfileProvider>(context, listen: false);
-           userProfileProvider.fetchUserProfile();
-
-    Future<void> _logout() async {
-      await FirebaseAuth.instance.signOut();
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => OnboardingScreen()));
-    }
-    Future<String> getEmail() async {
-      
-      String? email = FirebaseAuth.instance.currentUser?.email;
-
-      if (email != null && email.isNotEmpty) {
-        return email;
-      }
-
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      String? savedEmail = prefs.getString('email');
-
-      if (savedEmail != null && savedEmail.isNotEmpty) {
-        return savedEmail;
-      }
-      return 'Email not set';
-    }
-
     return Drawer(
       child: Stack(
         children: [
-
-
           Container(
             decoration: BoxDecoration(
               image: DecorationImage(
                 image: AssetImage('assets/background.jpg'),
                 fit: BoxFit.cover,
               ),
-            ),),
+            ),
+          ),
           Consumer<UserProfileProvider>(
             builder: (context, profile, child) {
               return ListView(
@@ -64,7 +75,10 @@ class CustomDrawer extends StatelessWidget {
                   DrawerHeader(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [Colors.deepPurple.shade700, Colors.purpleAccent.shade400],
+                        colors: [
+                          Colors.deepPurple.shade700,
+                          Colors.purpleAccent.shade400
+                        ],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
@@ -75,7 +89,7 @@ class CustomDrawer extends StatelessWidget {
                         CircleAvatar(
                           radius: 40,
                           backgroundImage: (profile.profileImage.isNotEmpty)
-                              ? FileImage(File(profile.profileImage))
+                              ? NetworkImage(profile.profileImage) // Use NetworkImage for Firebase URL
                               : AssetImage('assets/default_avatar.png') as ImageProvider,
                         ),
                         SizedBox(height: 10),
@@ -87,42 +101,24 @@ class CustomDrawer extends StatelessWidget {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        SizedBox(height: 0),
                         FutureBuilder<String>(
                           future: getEmail(),
                           builder: (context, snapshot) {
                             if (snapshot.connectionState == ConnectionState.waiting) {
-                              return Text(
-                                'Loading...',
-                                style: TextStyle(
-                                  color: Colors.white70,
-                                  fontSize: 12,
-                                ),
-                              );
+                              return Text('Loading...',
+                                  style: TextStyle(color: Colors.white70, fontSize: 12));
                             } else if (snapshot.hasError) {
-                              return Text(
-                                'Email not available',
-                                style: TextStyle(
-                                  color: Colors.white70,
-                                  fontSize: 12,
-                                ),
-                              );
+                              return Text('Error loading email',
+                                  style: TextStyle(color: Colors.white70, fontSize: 12));
                             } else {
-                              return Text(
-                                snapshot.data ?? 'Email not set',
-                                style: TextStyle(
-                                  color: Colors.white70,
-                                  fontSize: 12,
-                                ),
-                              );
+                              return Text(snapshot.data ?? 'Email not set',
+                                  style: TextStyle(color: Colors.white70, fontSize: 12));
                             }
                           },
                         ),
                       ],
                     ),
                   ),
-
-
                   ListTile(
                     leading: Icon(Icons.home_outlined, color: Colors.deepPurple),
                     title: Text('Home'),
@@ -152,7 +148,7 @@ class CustomDrawer extends StatelessWidget {
                       Navigator.pop(context);
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => ProfileScreen(email: ' emailController.text',)),
+                        MaterialPageRoute(builder: (context) => ProfileScreen(email: profile.name)),
                       );
                     },
                   ),
@@ -172,7 +168,8 @@ class CustomDrawer extends StatelessWidget {
                     leading: Icon(Icons.favorite, color: Colors.pink),
                     title: Text('Follow Me on Instagram'),
                     onTap: () async {
-                      const instagramUrl = 'https://www.instagram.com/flutter_with_prince?igsh=bTF4M3lpbDdkdmxj';
+                      const instagramUrl =
+                          'https://www.instagram.com/flutter_with_prince?igsh=bTF4M3lpbDdkdmxj';
                       if (await canLaunch(instagramUrl)) {
                         await launch(instagramUrl);
                       } else {
@@ -180,7 +177,7 @@ class CustomDrawer extends StatelessWidget {
                       }
                     },
                   ),
-                  SizedBox(height: 180,),
+                  SizedBox(height: 180),
                   ListTile(
                     title: ElevatedButton(
                       onPressed: _logout,
@@ -196,8 +193,7 @@ class CustomDrawer extends StatelessWidget {
                         ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(
-                            MediaQuery.of(context).size.width * 0.04,
-                          ),
+                              MediaQuery.of(context).size.width * 0.04),
                         ),
                         backgroundColor: Colors.redAccent,
                         foregroundColor: Colors.white,
@@ -205,16 +201,18 @@ class CustomDrawer extends StatelessWidget {
                       ),
                     ),
                   ),
-
-
                 ],
               );
             },
           ),
         ],
-      ),);
+      ),
+    );
   }
 }
+
+
+
 class UserProfileProvider with ChangeNotifier {
   String name = 'Not set';
   String age = 'Not set';
@@ -223,34 +221,82 @@ class UserProfileProvider with ChangeNotifier {
   String gender = 'Not set';
   String profileImage = '';
 
-  Future<void> updateUserProfile(String key, String value) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setString(key, value);
-    await fetchUserProfile();
-  }
+  final FirebaseDatabase _database = FirebaseDatabase.instance;
+  final FirebaseStorage _firebaseStorage = FirebaseStorage.instance;
+  final String userId = FirebaseAuth.instance.currentUser?.uid ?? '';
 
+  // Fetch user profile from Realtime Database
   Future<void> fetchUserProfile() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    name = prefs.getString('name') ?? 'Not set';
-    age = prefs.getString('age') ?? 'Not set';
-    dob = prefs.getString('dob') ?? 'Not set';
-    phone = prefs.getString('phone') ?? 'Not set';
-    gender = prefs.getString('gender') ?? 'Not set';
-    profileImage = prefs.getString('profileImage') ?? '';
-    notifyListeners();
+    try {
+      if (userId.isEmpty) {
+        print("User not logged in");
+        return;
+      }
+
+      DatabaseReference userRef = _database.ref().child('users/$userId');
+      DatabaseEvent event = await userRef.once();
+
+      if (event.snapshot.exists) {
+        Map<String, dynamic> data = Map<String, dynamic>.from(event.snapshot.value as Map);
+
+        name = data['name'] ?? 'Not set';
+        age = data['age'] ?? 'Not set';
+        dob = data['dob'] ?? 'Not set';
+        phone = data['phone'] ?? 'Not set';
+        gender = data['gender'] ?? 'Not set';
+        profileImage = data['profileImage'] ?? '';
+
+        notifyListeners();
+      }
+    } catch (e) {
+      print("Error fetching user profile: $e");
+    }
   }
 
-  Future<void> updateProfileImage(File image) async {
-    final directory = await getApplicationDocumentsDirectory();
-    String imagePath = join(directory.path, 'profile_image.png');
-    final savedImage = await image.copy(imagePath);
+  // Update a single field in Realtime Database
+  Future<void> updateUserProfile(String key, String value) async {
+    try {
+      if (userId.isEmpty) {
+        print("User not logged in");
+        return;
+      }
 
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setString('profileImage', savedImage.path);
-    profileImage = savedImage.path;
-    notifyListeners();
+      DatabaseReference userRef = _database.ref().child('users/$userId');
+      await userRef.update({key: value});
+      await fetchUserProfile();
+    } catch (e) {
+      print("Error updating user profile: $e");
+    }
+  }
+
+  // Upload image to Firebase Storage and update URL in Realtime Database
+  Future<void> updateProfileImage(XFile image) async {
+    try {
+      if (userId.isEmpty) {
+        print("User not logged in");
+        return;
+      }
+
+      File file = File(image.path);
+      String fileName = path.basename(file.path);
+
+      Reference storageRef = _firebaseStorage.ref().child('profile_images/$fileName');
+
+      await storageRef.putFile(file);
+      String downloadUrl = await storageRef.getDownloadURL();
+
+      DatabaseReference userRef = _database.ref().child('users/$userId');
+      await userRef.update({'profileImage': downloadUrl});
+
+      profileImage = downloadUrl;
+      notifyListeners();
+    } catch (e) {
+      print("Error uploading profile image: $e");
+    }
   }
 }
+
+
 
 
 

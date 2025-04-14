@@ -1,11 +1,11 @@
+// import 'package:firebase_database/firebase_database.dart';
+// import 'package:firebase_auth/firebase_auth.dart';
 // import 'package:flutter/material.dart';
 // import 'package:image_picker/image_picker.dart';
-// import 'package:iplayer/view/video_player_screen.dart';
-// import 'package:shared_preferences/shared_preferences.dart';
 // import 'dart:io';
+//
 // import 'package:google_fonts/google_fonts.dart';
-// import 'package:fluttertoast/fluttertoast.dart';
-// import 'package:flutter_animate/flutter_animate.dart';
+// import 'package:iplayer/view/video_player_screen.dart';
 //
 // class ProfileSetupScreen extends StatefulWidget {
 //   @override
@@ -29,18 +29,27 @@
 //   }
 //
 //   Future<void> _loadProfileData() async {
-//     SharedPreferences prefs = await SharedPreferences.getInstance();
-//     setState(() {
-//       nameController.text = prefs.getString('name') ?? '';
-//       ageController.text = prefs.getString('age') ?? '';
-//       dobController.text = prefs.getString('dob') ?? '';
-//       phoneController.text = prefs.getString('phone') ?? '';
-//       gender = prefs.getString('gender') ?? 'Male';
-//       profileImagePath = prefs.getString('profileImagePath');
-//       if (profileImagePath != null) {
-//         _image = File(profileImagePath!);
+//     User? user = FirebaseAuth.instance.currentUser;
+//
+//     if (user != null) {
+//       DatabaseReference dbRef = FirebaseDatabase.instance.ref("users/${user.uid}");
+//       DataSnapshot snapshot = await dbRef.get();
+//
+//       if (snapshot.exists) {
+//         Map<dynamic, dynamic> userData = snapshot.value as Map<dynamic, dynamic>;
+//         setState(() {
+//           nameController.text = userData['name'] ?? '';
+//           ageController.text = userData['age'] ?? '';
+//           dobController.text = userData['dob'] ?? '';
+//           phoneController.text = userData['phone'] ?? '';
+//           gender = userData['gender'] ?? 'Male';
+//           profileImagePath = userData['profileImagePath'];
+//           if (profileImagePath != null) {
+//             _image = File(profileImagePath!);
+//           }
+//         });
 //       }
-//     });
+//     }
 //   }
 //
 //   Future<void> _saveProfileData() async {
@@ -49,30 +58,38 @@
 //         dobController.text.isEmpty ||
 //         phoneController.text.isEmpty ||
 //         profileImagePath == null) {
-//       Fluttertoast.showToast(
-//         msg: "Please fill in all fields & select a profile image!",
-//         backgroundColor: Colors.red,
-//         textColor: Colors.white,
-//       );
+//       // Fluttertoast.showToast(
+//       //   msg: "Please fill in all fields & select a profile image!",
+//       //   backgroundColor: Colors.red,
+//       //   textColor: Colors.white,
+//       // );
 //       return;
 //     }
 //
-//     SharedPreferences prefs = await SharedPreferences.getInstance();
-//     await prefs.setString('name', nameController.text);
-//     await prefs.setString('age', ageController.text);
-//     await prefs.setString('dob', dobController.text);
-//     await prefs.setString('phone', phoneController.text);
-//     await prefs.setString('gender', gender);
-//     await prefs.setString('profileImagePath', profileImagePath!);
+//     User? user = FirebaseAuth.instance.currentUser;
 //
-//     Fluttertoast.showToast(
-//       msg: "Profile Saved Successfully!",
-//       backgroundColor: Colors.green,
-//       textColor: Colors.white,
-//     );
+//     if (user != null) {
+//       DatabaseReference dbRef = FirebaseDatabase.instance.ref("users/${user.uid}");
+//       await dbRef.set({
+//         "name": nameController.text,
+//         "age": ageController.text,
+//         "dob": dobController.text,
+//         "phone": phoneController.text,
+//         "gender": gender,
+//         "profileImagePath": profileImagePath,
+//       });
+//       //
+//       // Fluttertoast.showToast(
+//       //   msg: "Profile Saved Successfully!",
+//       //   backgroundColor: Colors.green,
+//       //   textColor: Colors.white,
+//       // );
 //
-//     Navigator.push(
-//         context, MaterialPageRoute(builder: (context) => VideoApp()));
+//       Navigator.push(
+//         context,
+//         MaterialPageRoute(builder: (context) => VideoApp()),
+//       );
+//     }
 //   }
 //
 //   Future<void> _pickImage() async {
@@ -84,9 +101,6 @@
 //         _image = File(pickedFile.path);
 //         profileImagePath = pickedFile.path;
 //       });
-//
-//       SharedPreferences prefs = await SharedPreferences.getInstance();
-//       await prefs.setString('profileImagePath', profileImagePath!);
 //     }
 //   }
 //
@@ -105,8 +119,7 @@
 //         centerTitle: true,
 //       ),
 //       body: Container(
-//         padding:
-//         EdgeInsets.all(MediaQuery.of(context).size.width * 0.04), // Dynamic padding
+//         padding: EdgeInsets.all(MediaQuery.of(context).size.width * 0.04),
 //         decoration: BoxDecoration(color: Colors.white),
 //         height: double.infinity,
 //         child: SingleChildScrollView(
@@ -122,19 +135,18 @@
 //                         ? FileImage(_image!)
 //                         : (profileImagePath != null
 //                         ? FileImage(File(profileImagePath!))
-//                         : AssetImage('assets/default_avatar.png'))
-//                     as ImageProvider,
+//                         : AssetImage('assets/default_avatar.png')
+//                     as ImageProvider),
 //                     child: _image == null && profileImagePath == null
 //                         ? Icon(
 //                       Icons.camera_alt,
 //                       color: Colors.white70,
-//                       size:
-//                       MediaQuery.of(context).size.width * 0.08,
+//                       size: MediaQuery.of(context).size.width * 0.08,
 //                     )
 //                         : null,
 //                   ),
 //                 ),
-//               ).animate().fadeIn(duration: 1000.ms).slideY(begin: -0.2, end: 0, curve: Curves.easeOut),
+//               ),
 //               SizedBox(height: MediaQuery.of(context).size.height * 0.08),
 //               _buildTextField("Name", nameController, Icons.person),
 //               _buildTextField(
@@ -185,21 +197,21 @@
 //                 child: Text(
 //                   "Save Profile",
 //                   style: GoogleFonts.lato(
-//                     fontSize:
-//                     MediaQuery.of(context).size.width * 0.05,
+//                     fontSize: MediaQuery.of(context).size.width * 0.05,
 //                     color: Colors.white,
 //                   ),
 //                 ),
-//               ).animate().fadeIn(duration: 1200.ms).slideY(begin: 0.3, end: 0, curve: Curves.easeOut),
+//               ),
 //             ],
-//           ),),
-//       ),);
+//           ),
+//         ),
+//       ),
+//     );
 //   }
+//
 //   Widget _buildTextField(String label,
-//       TextEditingController controller, IconData icon, {
-//         TextInputType keyboardType = TextInputType.text,
-//         bool isDateField = false,
-//       }) {
+//       TextEditingController controller, IconData icon,
+//       {TextInputType keyboardType = TextInputType.text, bool isDateField = false}) {
 //     return Padding(
 //       padding: const EdgeInsets.symmetric(vertical: 8.0),
 //       child: TextFormField(
@@ -208,7 +220,6 @@
 //         readOnly: isDateField,
 //         onTap: isDateField
 //             ? () async {
-//
 //           DateTime? pickedDate = await showDatePicker(
 //             context: context,
 //             initialDate: DateTime.now(),
@@ -221,7 +232,8 @@
 //             setState(() {
 //               controller.text = formattedDate;
 //             });
-//           }}
+//           }
+//         }
 //             : null,
 //         style: TextStyle(color: Colors.black, fontWeight: FontWeight.w500),
 //         decoration: InputDecoration(
@@ -234,6 +246,4 @@
 //       ),
 //     );
 //   }
-//
-//
 // }

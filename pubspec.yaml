@@ -9,51 +9,67 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  file_picker: any
-  permission_handler: any
-  hive_flutter: any
-  hive: any
-  path_provider: any
-  pip_view: any
-  media_store_plus: any
-  dio: any
-  shimmer: any
-  shared_preferences: any
-  flutter_downloader: any
-  google_sign_in: any
-  blur: any
-  video_player: any
-  chewie: any
-  image_picker: any
-  introduction_screen: any
-  showcaseview: any
 
-  animated_text_kit: any
-  intro_slider: any
-  smooth_page_indicator: any
-  tutorial_coach_mark: any
-  path: any
-  floating_navbar: any
-  animate_do: any
-  flutter_overboard: any
-  google_fonts: any
-  intl: any
-  fluttertoast: any
-  screen_brightness: any
+  # Firebase & Auth
+  firebase_core: ^2.27.0
+  firebase_auth: ^4.17.4
+  firebase_database: ^10.4.0
+#  cloud_firestore: ^4.15.0
+  firebase_storage: ^11.6.0
+
+  # Permissions & Storage
+  permission_handler: ^11.3.0
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  path_provider: ^2.1.2
+  media_store_plus: ^0.0.9
+  path: ^1.9.0
+#  shared_preferences: ^2.5.3
+  photo_manager: ^3.1.1
+
+  # File & Downloads
+  dio: ^5.4.0
+  flutter_downloader: ^1.11.5
+
+  # Video & Image
+  video_player: ^2.8.3
+  chewie: ^1.7.5
+  image_picker: ^1.0.7
+  pip_view: ^0.9.7
+  screen_brightness: ^2.1.2
   volume_controller: ^2.0.4
-  url_launcher: any
-  flutter_animate: any
-  curved_navigation_bar: any
-  photo_manager: any
-  lottie: any
-  another_flushbar: any
-  connectivity_plus: any
-  provider: any
-  firebase_core: any
-  firebase_auth: any
-  cloud_firestore: any
-  firebase_storage: any
-  cupertino_icons: any
+
+  # Animations & Effects
+  shimmer: ^3.0.0
+  lottie: ^2.6.0
+  animate_do: ^2.1.0
+  flutter_animate: ^4.3.0
+  blur: ^3.1.0
+
+  # UI & Navigation
+  google_fonts: ^6.1.0
+  curved_navigation_bar: ^1.0.3
+  floating_navbar: ^2.0.2
+  cupertino_icons: ^1.0.6
+  url_launcher: ^6.2.5
+  another_flushbar: ^1.12.30
+#  fluttertoast: any
+
+  # Onboarding & Tutorials
+  introduction_screen: ^3.1.12
+  intro_slider: ^3.0.1
+  smooth_page_indicator: ^1.1.0
+  tutorial_coach_mark: ^1.2.8
+  flutter_overboard: ^3.1.1
+  showcaseview: ^2.0.3
+
+  # Utility
+  google_sign_in: ^6.2.1
+  intl: ^0.19.0
+  connectivity_plus: ^5.0.2
+  provider: ^6.1.2
+  animated_text_kit: ^4.2.2
+
 
 
 dev_dependencies:
@@ -61,7 +77,7 @@ dev_dependencies:
     sdk: flutter
 
 
-  flutter_lints: any
+  flutter_lints: ^2.0.0
 
 
 flutter:

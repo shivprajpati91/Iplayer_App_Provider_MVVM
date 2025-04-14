@@ -4,12 +4,12 @@ import 'package:animate_do/animate_do.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iplayer/view/video_player_screen.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
 import 'package:shimmer/shimmer.dart';
 import 'SearchBar.dart';
 import 'CustomDrawer.dart';
@@ -387,14 +387,14 @@ class _LibraryScreenState extends State<LibraryScreen> {
 
 
   void _showSubscriptionToast() {
-    Fluttertoast.showToast(
-      msg: "feature Cooming Soon!",
-      toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.BOTTOM,
-      backgroundColor: Colors.purpleAccent,
-      textColor: Colors.white,
-      fontSize: 16.0,
-    );
+    // Fluttertoast.showToast(
+    //   msg: "feature Cooming Soon!",
+    //   toastLength: Toast.LENGTH_SHORT,
+    //   gravity: ToastGravity.BOTTOM,
+    //   backgroundColor: Colors.purpleAccent,
+    //   textColor: Colors.white,
+    //   fontSize: 16.0,
+    // );
   }
   Widget _buildVideoView() {
     return videoFiles.isEmpty
@@ -858,9 +858,9 @@ class _LibraryScreenState extends State<LibraryScreen> {
           ),
         ),
         title: Text('SLEEPLAY',style: TextStyle(fontWeight: FontWeight.w500),),
-        actions: [IconButton(onPressed: (){
-          Navigator.pushReplacement(context,MaterialPageRoute(builder: (context)=>HelpAndSupportScreen()));
-        }, icon: Icon(Icons.help_outline))],
+        // actions: [IconButton(onPressed: (){
+        //   Navigator.pushReplacement(context,MaterialPageRoute(builder: (context)=>HelpAndSupportScreen()));
+        // }, icon: Icon(Icons.help_outline))],
       ),
         drawer: CustomDrawer(),
         backgroundColor: Colors.white,
@@ -886,10 +886,6 @@ class _LibraryScreenState extends State<LibraryScreen> {
         ),
     );}
 }
-
-
-
-
 
 class FeatureDetailsScreen extends StatefulWidget {
   final String title;
@@ -929,11 +925,11 @@ class _FeatureDetailsScreenState extends State<FeatureDetailsScreen>
   }
 
   void _showToast() {
-    Fluttertoast.showToast(
-      msg: "Feature Coming Soon!",
-      backgroundColor: Colors.purpleAccent,
-      textColor: Colors.white,
-    );
+    // Fluttertoast.showToast(
+    //   msg: "Feature Coming Soon!",
+    //   backgroundColor: Colors.purpleAccent,
+    //   textColor: Colors.white,
+    // );
   }
 
   @override

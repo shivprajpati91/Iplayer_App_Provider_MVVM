@@ -1,11 +1,11 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:iplayer/view/Profile_Setup.dart';
 import 'package:iplayer/view/login_screen.dart';
 import 'package:iplayer/view/video_player_screen.dart';
 import '../utils/utils.dart';
-
+import 'package:firebase_database/firebase_database.dart';
 class SignUpScreen extends StatefulWidget {
   @override
   _SignUpScreenState createState() => _SignUpScreenState();
@@ -32,6 +32,8 @@ class _SignUpScreenState extends State<SignUpScreen> with SingleTickerProviderSt
     super.dispose();
   }
 
+
+
   Future<void> _signUp() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -43,21 +45,26 @@ class _SignUpScreenState extends State<SignUpScreen> with SingleTickerProviderSt
         email: email,
         password: password,
       );
-      await FirebaseFirestore.instance.collection("users").doc(userCredential.user!.uid).set({
+
+      // Convert email to a Realtime Database-safe key (replace "." with "_")
+      String emailKey = email.replaceAll('.', '_');
+
+      // Save to Realtime Database
+      DatabaseReference dbRef = FirebaseDatabase.instance.ref("users/$emailKey");
+      await dbRef.set({
         "email": email,
         "uid": userCredential.user!.uid,
-      });
-      Utils.toastMessage("Account created successfully!");
+        "name": "",
 
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (context) => VideoApp()),
-            (route) => false,
-      );
+      });
+
+      Utils.toastMessage("Account created successfully!");
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => VideoApp()));
     } catch (e) {
       Utils.toastMessage("Sign up failed: ${e.toString()}");
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

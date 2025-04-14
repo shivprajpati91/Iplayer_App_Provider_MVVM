@@ -1,12 +1,13 @@
 import 'dart:convert';
 import 'dart:math';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+
 import 'package:iplayer/view/video_player_screen.dart';
 import '../FadeAnimation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
 import 'package:lottie/lottie.dart';
 import '../res/component/round_button.dart';
 import '../utils/utils.dart';
@@ -14,7 +15,7 @@ import 'Profile_Setup.dart';
 import 'Sign_In.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+
 class LoginScreen extends StatefulWidget {
   @override
   _LoginScreenState createState() => _LoginScreenState();
@@ -45,16 +46,13 @@ class _LoginScreenState extends State<LoginScreen> {
 
 
 
+
+
   void _handleGoogleSignIn() async {
     try {
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
 
       if (googleUser == null) {
-        Fluttertoast.showToast(
-          msg: "Sign-in cancelled",
-          backgroundColor: Colors.grey,
-          textColor: Colors.white,
-        );
         return;
       }
 
@@ -65,26 +63,36 @@ class _LoginScreenState extends State<LoginScreen> {
         idToken: googleAuth.idToken,
       );
 
-      await FirebaseAuth.instance.signInWithCredential(credential);
+      UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+      User? user = userCredential.user;
 
-      Fluttertoast.showToast(
-        msg: "Signed in as ${googleUser.displayName}",
-        backgroundColor: Colors.green,
-        textColor: Colors.white,
-      );
+      if (user != null) {
+        // Create user data
+        Map<String, dynamic> userData = {
+          "uid": user.uid,
 
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => VideoApp()),
-      );
+          "email": user.email ?? "",
+
+          "provider": "google",
+          "lastLogin": DateTime.now().toIso8601String(),
+        };
+
+        // Save to Firebase Realtime Database
+        DatabaseReference userRef = FirebaseDatabase.instance.ref().child("users").child(user.uid);
+        await userRef.set(userData);
+
+        Utils.toastMessage("Signed in as ${user.displayName}");
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => VideoApp()),
+        );
+      }
     } catch (e) {
-      Fluttertoast.showToast(
-        msg: "Sign-in failed: $e",
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-      );
+      Utils.toastMessage("Sign-in failed: $e");
     }
   }
+
   Future<void> _login() async {
     String email = _emailController.text.trim();
     String password = _passwordController.text.trim();
@@ -100,13 +108,29 @@ class _LoginScreenState extends State<LoginScreen> {
         password: password,
       );
 
-      Utils.toastMessage("Login Successful!");
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => VideoApp()));
+      User? user = userCredential.user;
+
+      if (user != null) {
+        // Store user data in Realtime Database
+        Map<String, dynamic> userData = {
+          "uid": user.uid,
+          "email": user.email ?? "",
+          "provider": "email",
+          "lastLogin": DateTime.now().toIso8601String(),
+        };
+
+        DatabaseReference userRef = FirebaseDatabase.instance.ref().child("users").child(user.uid);
+        await userRef.set(userData);
+
+        Utils.toastMessage("Login Successful!");
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => VideoApp()));
+      }
 
     } catch (e) {
       Utils.toastMessage("Login failed: ${e.toString()}");
     }
   }
+
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;

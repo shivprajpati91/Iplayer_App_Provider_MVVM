@@ -1,7 +1,7 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iplayer/view/video_player_screen.dart';
 
@@ -10,11 +10,11 @@ class SubscriptionScreen extends StatelessWidget {
 
 
   void _subscribe(String planName) {
-    Fluttertoast.showToast(
-      msg: "Cooming Soon $planName!",
-      backgroundColor: Colors.purpleAccent,
-      textColor: Colors.white,
-    );
+    // Fluttertoast.showToast(
+    //   msg: "Cooming Soon $planName!",
+    //   backgroundColor: Colors.purpleAccent,
+    //   textColor: Colors.white,
+    // );
   }
 
   void _showComingSoon(BuildContext context) {
@@ -398,13 +398,13 @@ class SubscriptionDetailsScreen extends StatelessWidget {
     required this.benefits,
   });
 
-  void _subscribe(String planName) {
-    Fluttertoast.showToast(
-      msg: "Coming Soon for $planName!",
-      backgroundColor: Colors.purpleAccent,
-      textColor: Colors.white,
-    );
-  }
+  // void _subscribe(String planName) {
+  //   Fluttertoast.showToast(
+  //     msg: "Coming Soon for $planName!",
+  //     backgroundColor: Colors.purpleAccent,
+  //     textColor: Colors.white,
+  //   );
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -534,7 +534,8 @@ class SubscriptionDetailsScreen extends StatelessWidget {
               horizontal: MediaQuery.of(context).size.width * (20 / 375),
             ),
             child: ElevatedButton(
-              onPressed: () => _subscribe(plan),
+              onPressed: (){},
+              // => _subscribe(plan),
               child: Text(
                 "Subscribe Now",
                 style: GoogleFonts.lato(

@@ -1,16 +1,13 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+
 import 'package:flutter/material.dart';
 // import 'package:image_picker/image_picker.dart';
 import 'package:iplayer/view/video_player_screen.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
-
 class ProfileScreen extends StatefulWidget {
   @override
   final String email;
@@ -55,13 +52,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
 
   Future<void> _loadProfile() async {
+    try {
+      final String emailKey = widget.email.replaceAll('.', '_');
+      DatabaseReference dbRef = FirebaseDatabase.instance.ref("users/$emailKey");
 
-    final String emailKey = widget.email.replaceAll('.', '_');
-    DatabaseReference dbRef = FirebaseDatabase.instance.ref("users/$emailKey");
+      // Fetch data once using .get()
+      final snapshot = await dbRef.get();
 
-    dbRef.onValue.listen((event) {
-      if (event.snapshot.exists) {
-        final data = Map<String, dynamic>.from(event.snapshot.value as Map);
+      if (snapshot.exists) {
+        final data = Map<String, dynamic>.from(snapshot.value as Map);
         setState(() {
           nameController.text = data['name'] ?? '';
           emailController.text = data['email'] ?? '';
@@ -72,10 +71,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
           profileImage = data['profileImage'] ?? '';
         });
       } else {
-        print("No profile found at: users/$emailKey");
+        _showError("No profile found for this user.");
       }
-    });
+    } catch (error) {
+      _showError("Error loading profile: $error");
+    }
   }
+
+
 
   double _calculateProfileCompletion() {
     int completedFields = 0;
