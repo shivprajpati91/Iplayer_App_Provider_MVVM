@@ -1,16 +1,11 @@
-# iplayer
-
-A new Flutter project.
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+![Screenshot (554)](https://github.com/user-attachments/assets/5ee12cdb-c452-4632-b6a5-ffbe5ad9a30a)
+![Screenshot (553)](https://github.com/user-attachments/assets/7eac528c-8e57-40e4-b97b-35cb2bd3e4b9)
+![Screenshot (552)](https://github.com/user-attachments/assets/0fd79d2b-1134-4646-bd73-ae1b38c0e84b)
+![Screenshot (551)](https://github.com/user-attachments/assets/e775e99e-f233-43c6-b5fe-d4f540a3316c)
+![Screenshot (550)](https://github.com/user-attachments/assets/dc2292f6-3c01-46b6-8e1d-45791a222cdb)
+![Screenshot (549)](https://github.com/user-attachments/assets/9f8435c7-4b24-4f27-bcd4-b71aaa61ab80)
+![Screenshot (548)](https://github.com/user-attachments/assets/f39a5faf-2cef-4871-ab7e-0fd85b332ccc)
+![Screenshot (547)](https://github.com/user-attachments/assets/7f5ec5fc-fd91-4cc4-b15b-617023d8a4ee)
+![Screenshot (546)](https://github.com/user-attachments/assets/5b621d61-b6f6-412d-afa3-bbfc861efd0e)
+![Screenshot (555)](https://github.com/user-attachments/assets/797e4add-e2dc-488e-94e7-6b197df348aa)
+![Screenshot (556)](https://github.com/user-attachments/assets/16cd3015-3201-40c5-a907-ecce16229177)
