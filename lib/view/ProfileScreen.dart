@@ -1,10 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
+// import 'package:image_picker/image_picker.dart';
 import 'package:iplayer/view/video_player_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
-
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -12,72 +13,78 @@ import 'dart:io';
 
 class ProfileScreen extends StatefulWidget {
   @override
+  final String email;
+
+  const ProfileScreen({Key? key, required this.email}) : super(key: key);
   _ProfileScreenState createState() => _ProfileScreenState();
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  String name = "";
-  String email = "";
-  String dob = "";
-  String phone = "";
-  String gender = "";
-  String address = "";
-  String profileImage = "";
+  TextEditingController nameController = TextEditingController();
+  TextEditingController emailController = TextEditingController();
+  TextEditingController dobController = TextEditingController();
+  TextEditingController phoneController = TextEditingController();
+  TextEditingController addressController = TextEditingController();
+  String selectedGender = '';
+  String profileImage = '';
 
   @override
   void initState() {
     super.initState();
     _loadProfile();
   }
-
-  Future<void> _loadProfile() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-
-    String storedEmail = prefs.getString('email') ?? "";
-    if (storedEmail.isNotEmpty) {
-      DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('users').doc(storedEmail).get();
-      if (userDoc.exists) {
-        setState(() {
-          name = userDoc['name'];
-          email = userDoc['email'];
-          dob = userDoc['dob'];
-          phone = userDoc['phone'];
-          gender = userDoc['gender'];
-          address = userDoc['address'];
-          profileImage = userDoc['profileImage'];
-        });
-
-        // Store locally for offline access
-        await prefs.setString('name', name);
-        await prefs.setString('dob', dob);
-        await prefs.setString('phone', phone);
-        await prefs.setString('gender', gender);
-        await prefs.setString('address', address);
-        await prefs.setString('profileImage', profileImage);
-      }
-    }
+  void _showError(String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Error'),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
 
-  Future<void> _pickImage() async {
-    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setString('profileImage', pickedFile.path);
-      setState(() {
-        profileImage = pickedFile.path;
-      });
-    }
+  Future<void> _loadProfile() async {
+
+    final String emailKey = widget.email.replaceAll('.', '_');
+    DatabaseReference dbRef = FirebaseDatabase.instance.ref("users/$emailKey");
+
+    dbRef.onValue.listen((event) {
+      if (event.snapshot.exists) {
+        final data = Map<String, dynamic>.from(event.snapshot.value as Map);
+        setState(() {
+          nameController.text = data['name'] ?? '';
+          emailController.text = data['email'] ?? '';
+          dobController.text = data['dob'] ?? '';
+          phoneController.text = data['phone'] ?? '';
+          selectedGender = data['gender'] ?? '';
+          addressController.text = data['address'] ?? '';
+          profileImage = data['profileImage'] ?? '';
+        });
+      } else {
+        print("No profile found at: users/$emailKey");
+      }
+    });
   }
 
   double _calculateProfileCompletion() {
     int completedFields = 0;
-    if (name.isNotEmpty) completedFields++;
-    if (email.isNotEmpty) completedFields++;
-    if (dob.isNotEmpty) completedFields++;
-    if (phone.isNotEmpty) completedFields++;
-    if (gender.isNotEmpty) completedFields++;
-    if (address.isNotEmpty) completedFields++;
+    if (nameController.text.isNotEmpty) completedFields++;
+    if (emailController.text.isNotEmpty) completedFields++;
+    if (dobController.text.isNotEmpty) completedFields++;
+    if (phoneController.text.isNotEmpty) completedFields++;
+    if (selectedGender.isNotEmpty) completedFields++;
+    if (addressController.text.isNotEmpty) completedFields++;
     if (profileImage.isNotEmpty) completedFields++;
     return completedFields / 7;
   }
@@ -88,9 +95,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        leading: InkWell(child: Icon(Icons.turn_left,color: Colors.white,),onTap: (){
+        leading: InkWell(child: Icon(Icons.turn_left,color: Colors.white,),onTap: () {
           Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>VideoApp()));
-        },),
+        }),
         title: Text("Profile", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
         backgroundColor: Colors.purple,
         actions: [
@@ -101,31 +108,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => EditProfileScreen(
-                    name: name,
-                    email: email,
-                    dob: dob,
-                    phone: phone,
-                    gender: gender,
-                    image: profileImage, // Pass the existing image
-                    address: address,
+                    name: nameController.text,
+                    email: emailController.text,
+                    dob: dobController.text,
+                    phone: phoneController.text,
+                    gender: selectedGender,
+                    image: profileImage,
+                    address: addressController.text,
                   ),
                 ),
               );
 
               if (result != null) {
                 setState(() {
-                  name = result['name'];
-                  email = result['email'];
-                  dob = result['dob'];
-                  phone = result['phone'];
-                  gender = result['gender'];
-                  address = result['address'];
-                  profileImage = result['profileImage']; // Update profile image
+                  nameController.text = result['name'];
+                  emailController.text = result['email'];
+                  dobController.text = result['dob'];
+                  phoneController.text = result['phone'];
+                  selectedGender = result['gender'];
+                  addressController.text = result['address'];
+                  profileImage = result['profileImage'];
                 });
               }
             },
-
-          )
+          ),
         ],
       ),
       body: SingleChildScrollView(
@@ -133,11 +139,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Container(decoration: BoxDecoration(border: Border.all(color: Colors.purpleAccent),
-            borderRadius: BorderRadius.circular(60)
-            ),
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.purpleAccent),
+                borderRadius: BorderRadius.circular(60),
+              ),
               child: GestureDetector(
-                onTap: _pickImage,
                 child: CircleAvatar(
                   radius: 60,
                   backgroundImage: profileImage.isNotEmpty
@@ -172,17 +179,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               child: Column(
                 children: [
-                  _profileDetail("Name", name, Icons.person),
+                  _profileDetail("Name", nameController.text, Icons.person),
                   _divider(),
-                  _profileDetail("Email", email, Icons.email),
+                  _profileDetail("Email", emailController.text, Icons.email),
                   _divider(),
-                  _profileDetail("Date of Birth", dob, Icons.calendar_today),
+                  _profileDetail("Date of Birth", dobController.text, Icons.calendar_today),
                   _divider(),
-                  _profileDetail("Phone", phone, Icons.phone),
+                  _profileDetail("Phone", phoneController.text, Icons.phone),
                   _divider(),
-                  _profileDetail("Gender", gender, Icons.wc),
+                  _profileDetail("Gender", selectedGender, Icons.wc),
                   _divider(),
-                  _profileDetail("Address", address, Icons.home),
+                  _profileDetail("Address", addressController.text, Icons.home),
                 ],
               ),
             ),
@@ -225,9 +232,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
 }
 
 
+
+
 class EditProfileScreen extends StatefulWidget {
-  final String name, email, dob,
-      phone, gender, image, address;
+  final String name, email, dob, phone, gender, image, address;
   EditProfileScreen({
     required this.name,
     required this.email,
@@ -266,10 +274,24 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Future<void> _pickImage() async {
     final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
+      File imageFile = File(pickedFile.path);
+      String imageUrl = await _uploadImage(imageFile);
+
       setState(() {
-        profileImage = pickedFile.path;
+        profileImage = imageUrl;
       });
     }
+  }
+
+  Future<String> _uploadImage(File imageFile) async {
+    String fileName = 'profiles/${DateTime.now().millisecondsSinceEpoch}.jpg';
+    firebase_storage.UploadTask uploadTask = firebase_storage.FirebaseStorage.instance
+        .ref(fileName)
+        .putFile(imageFile);
+
+    firebase_storage.TaskSnapshot snapshot = await uploadTask;
+    return await snapshot.ref.getDownloadURL();
+
   }
 
   Future<void> _selectDate() async {
@@ -308,17 +330,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       return;
     }
 
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString('name', nameController.text);
-    await prefs.setString('email', emailController.text);
-    await prefs.setString('dob', dobController.text);
-    await prefs.setString('phone', phoneController.text);
-    await prefs.setString('gender', selectedGender);
-    await prefs.setString('address', addressController.text);
-    await prefs.setString('profileImage', profileImage);
+    // Save to Realtime Database
+    DatabaseReference dbRef = FirebaseDatabase.instance.ref("users/${emailController.text.replaceAll('.', '_')}");
 
-    // Save to Firestore
-    await FirebaseFirestore.instance.collection('users').doc(emailController.text).set({
+    await dbRef.set({
       'name': nameController.text,
       'email': emailController.text,
       'dob': dobController.text,
@@ -340,6 +355,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
 
+
   bool _isValidEmail(String email) {
     final emailRegex = RegExp(r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$');
     return emailRegex.hasMatch(email);
@@ -359,10 +375,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        leading: InkWell(child: Icon(Icons.turn_left,color: Colors.white,),onTap: (){
-          Navigator.pop(context);
-        },),
-        title: Text("Edit Profile", style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold)),
+        leading: InkWell(
+          child: Icon(Icons.turn_left, color: Colors.white),
+          onTap: () => Navigator.pop(context),
+        ),
+        title: Text("Edit Profile", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         backgroundColor: Colors.purple,
       ),
       body: SingleChildScrollView(
@@ -383,7 +400,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     radius: 70,
                     backgroundColor: Colors.white,
                     backgroundImage: profileImage.isNotEmpty
-                        ? FileImage(File(profileImage))
+                        ? NetworkImage(profileImage)
                         : AssetImage("assets/default_avatar.png") as ImageProvider,
                   ),
                 ),
@@ -435,7 +452,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
             SizedBox(height: 25),
 
-            // Save Button
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(

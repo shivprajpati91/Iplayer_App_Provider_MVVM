@@ -162,7 +162,7 @@ class _VideoAppState extends State<VideoApp> with SingleTickerProviderStateMixin
           FloatingNavBarItem(
             iconData: Icons.person_2_outlined,
             title: 'Profile',
-            page:ProfileScreen(),
+            page:ProfileScreen(email: ' emailController.text',),
           ),
 
         ],

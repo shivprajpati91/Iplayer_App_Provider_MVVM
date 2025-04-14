@@ -152,7 +152,7 @@ class CustomDrawer extends StatelessWidget {
                       Navigator.pop(context);
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => ProfileScreen()),
+                        MaterialPageRoute(builder: (context) => ProfileScreen(email: ' emailController.text',)),
                       );
                     },
                   ),
