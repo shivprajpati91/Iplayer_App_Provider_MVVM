@@ -19,7 +19,7 @@ class _SplashScreenState extends State<SplashScreen> {
   }
   Future<void> _startTimer() async {
 
-    await Future.delayed(Duration(minutes: 20));
+    await Future.delayed(Duration(seconds: 4));
     _checkLoginStatus();
   }
   Future<void> _checkLoginStatus() async {

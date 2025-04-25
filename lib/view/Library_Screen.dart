@@ -71,9 +71,9 @@ class _LibraryScreenState extends State<LibraryScreen> {
     return videoFolders.isEmpty
         ? Center(
       child: Text(
-        "No video folders found!",
+        "No video folders found! Because we\n                     working on it",
         style: GoogleFonts.poppins(
-          fontSize: MediaQuery.of(context).size.width * 0.04, // Responsive text size
+          fontSize: MediaQuery.of(context).size.width * 0.05, // Responsive text size
           fontWeight: FontWeight.w500,
           color: Colors.grey.shade700,
         ),
@@ -381,10 +381,6 @@ class _LibraryScreenState extends State<LibraryScreen> {
       ),
     );
   }
-
-
-
-
 
   void _showSubscriptionToast() {
     // Fluttertoast.showToast(
@@ -857,7 +853,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
             color: Colors.white
           ),
         ),
-        title: Text('SLEEPLAY',style: TextStyle(fontWeight: FontWeight.w500),),
+        title: Text('Egosta Devlogs',style: TextStyle(fontWeight: FontWeight.w500),),
         // actions: [IconButton(onPressed: (){
         //   Navigator.pushReplacement(context,MaterialPageRoute(builder: (context)=>HelpAndSupportScreen()));
         // }, icon: Icon(Icons.help_outline))],

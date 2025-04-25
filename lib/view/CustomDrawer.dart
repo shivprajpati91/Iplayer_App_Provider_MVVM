@@ -4,14 +4,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:image_picker/image_picker.dart';
-
-import 'package:iplayer/view/video_player_screen.dart';
 import 'package:path/path.dart' as path;
-import 'package:path_provider/path_provider.dart';
+
 import 'package:provider/provider.dart';
-// import 'package:shared_preferences/shared_preferences.dart';
+
 import 'package:url_launcher/url_launcher.dart';
 
 import 'onboarding_screen.dart';
@@ -32,7 +28,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
 
   Future<String> getEmail() async {
     User? user = FirebaseAuth.instance.currentUser;
-    return user?.email ?? 'Email not set';
+    return user?.email ?? 'Working on it......';
   }
 
   @override
@@ -128,11 +124,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
 
 class UserProfileProvider with ChangeNotifier {
   String name = 'Not set';
-  String age = 'Not set';
-  String dob = 'Not set';
-  String phone = 'Not set';
-  String gender = 'Not set';
-  String profileImage = '';
+
 
   final FirebaseDatabase _database = FirebaseDatabase.instance;
   final FirebaseStorage _firebaseStorage = FirebaseStorage.instance;
@@ -153,11 +145,8 @@ class UserProfileProvider with ChangeNotifier {
         Map<String, dynamic> data = Map<String, dynamic>.from(event.snapshot.value as Map);
 
         name = data['name'] ?? 'Not set';
-        age = data['age'] ?? 'Not set';
-        dob = data['dob'] ?? 'Not set';
-        phone = data['phone'] ?? 'Not set';
-        gender = data['gender'] ?? 'Not set';
-        profileImage = data['profileImage'] ?? '';
+
+
 
         notifyListeners();
       }
@@ -182,35 +171,7 @@ class UserProfileProvider with ChangeNotifier {
     }
   }
 
-  // Upload image to Firebase Storage and update URL in Realtime Database
-  Future<void> updateProfileImage(XFile image) async {
-    try {
-      if (userId.isEmpty) {
-        print("User not logged in");
-        return;
-      }
-
-      File file = File(image.path);
-      String fileName = path.basename(file.path);
-
-      Reference storageRef = _firebaseStorage.ref().child('profile_images/$fileName');
-
-      await storageRef.putFile(file);
-      String downloadUrl = await storageRef.getDownloadURL();
-
-      DatabaseReference userRef = _database.ref().child('users/$userId');
-      await userRef.update({'profileImage': downloadUrl});
-
-      profileImage = downloadUrl;
-      notifyListeners();
-    } catch (e) {
-      print("Error uploading profile image: $e");
-    }
-  }
 }
-
-
-
 
 class HelpAndSupportScreen extends StatelessWidget {
   const HelpAndSupportScreen({Key? key}) : super(key: key);
@@ -245,7 +206,7 @@ class HelpAndSupportScreen extends StatelessWidget {
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
-            fontSize: mediaQuery.size.width * 0.05, // 👈 Responsive title size
+            fontSize: mediaQuery.size.width * 0.05,
           ),
         ),
         flexibleSpace: Container(
@@ -261,19 +222,19 @@ class HelpAndSupportScreen extends StatelessWidget {
       body: Container(
         decoration: BoxDecoration(color: Colors.white),
         child: Padding(
-          padding: EdgeInsets.all(mediaQuery.size.width * 0.04), // 👈 Responsive Padding
+          padding: EdgeInsets.all(mediaQuery.size.width * 0.04),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 'Need Help?',
                 style: TextStyle(
-                  fontSize: mediaQuery.size.width * 0.07, // 👈 7% width font size
+                  fontSize: mediaQuery.size.width * 0.07,
                   fontWeight: FontWeight.bold,
                   color: Colors.deepPurple.shade800,
                 ),
               ),
-              SizedBox(height: mediaQuery.size.height * 0.01), // 👈 Responsive space
+              SizedBox(height: mediaQuery.size.height * 0.01),
               Text(
                 'We are here to assist you. Reach out to us through any of the following channels:',
                 style: TextStyle(
